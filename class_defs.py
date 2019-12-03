@@ -60,7 +60,7 @@ class BS_sim:
         self.steps = int(252*maturity)
         self.vols = vols
     
-    def simulate(self, sim_number = 1000):
+    def simulate(self, sim_number = 10000):
         dt = self.maturity/self.steps
         n_stocks = len(self.initial_stock_prices) 
         prices = np.zeros((n_stocks,self.steps,sim_number))  #np array of zeros where the simulated prices will go
@@ -79,7 +79,7 @@ class BS_sim:
 
 
 #testing things out
-tickers = ['AAPL', 'MSFT','F']
+tickers = ['AAPL','MSFT','SPY','XLF']
 test = stock_history_finder(tickers)
 returns = test.get_ann_returns()
 vols = test.get_vols()
@@ -88,10 +88,15 @@ corr_mat = test.get_corr_mat()
 latest_prices = test.get_latest_prices()
 latest_prices = [latest_prices[ticker] for ticker in tickers]
 #testing out a simulation
-test_sim = BS_sim([100,200], [0,0], [0.25,0.25] ,[[1,-0.5],[-0.5,1]], 1)
+test_sim = BS_sim(latest_prices,len(tickers)*[0] , vols ,corr_mat, 0.5)
 test_output = test_sim.simulate(sim_number = 5000)
-plt.plot(test_output[0])
-plt.show()
-#testing out put price, should be near 9.75
-payoffs = np.maximum(100-test_output[0][-1],0)
-print(sum(payoffs)/5000)
+# plt.plot(test_output[0])
+# plt.show()
+# plt.plot(test_output[1])
+# plt.show()
+# plt.plot(test_output[2])
+# plt.show()
+
+for stock in range(len(tickers)):
+    payoffs = np.maximum(float(latest_prices[stock])-test_output[stock][-1],0)
+    print(sum(payoffs)/5000)
