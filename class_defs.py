@@ -64,9 +64,10 @@ class BS_sim:
         for stock in range(n_stocks):
             prices[stock][0] = self.initial_stock_prices[stock]  #populating with the initial stock prices
         
-        #write actual simulation 
-        
-        return prices
+        for time in range(1,self.steps):
+            random_variables = np.random.multivariate_normal(returns, cov_mat, sim_number)
+            #insert actual BS equation
+        return random_variables
 
 
 #testing things out
