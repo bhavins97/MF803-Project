@@ -44,15 +44,21 @@ class stock_history_finder:
         returns = self.get_returns_data()
         cov_mat = returns.cov()
         return cov_mat
+    
+    def get_corr_mat(self):
+        returns = self.get_returns_data()
+        corr_mat = returns.corr()
+        return corr_mat
 
 class BS_sim:
 
-    def __init__(self, initial_stock_prices, returns, cov_mat, maturity):
-        self.cov_mat = np.array(cov_mat)
+    def __init__(self, initial_stock_prices, returns, vols, corr_mat, maturity):
+        self.corr_mat = np.array(corr_mat)
         self.initial_stock_prices = initial_stock_prices
         self.returns = returns
         self.maturity = maturity
         self.steps = int(252*maturity)
+        self.vols = vols
     
     def simulate(self, sim_number = 1000):
         dt = self.maturity/self.steps
@@ -66,13 +72,11 @@ class BS_sim:
             prices[stock][0] = self.initial_stock_prices[stock]  #populating with the initial stock prices
         
         for time in range(1,self.steps):
-            random_variables = np.random.multivariate_normal(self.returns, cov_mat, sim_number) #generating correlated random variables
+            random_variables = np.random.multivariate_normal(self.returns, self.corr_mat, sim_number) #generating correlated random variables
             for stock in range(n_stocks):
-                prices[stock][time] = prices[stock][time-1] + self.returns[stock]*prices[stock][time-1]*dt + np.sqrt((self.cov_mat[stock][stock]*252))*prices[stock][time-1]*random_variables[:,stock]
+                prices[stock][time] = prices[stock][time-1] + self.returns[stock]*prices[stock][time-1]*dt + self.vols[stock]*prices[stock][time-1]*np.sqrt(dt)*random_variables[:,stock]
         return prices
-#prices don't move quite enough
-#It has something to do with the covariance matrix
-# other than that, the simulation part is almost done
+
 
 #testing things out
 tickers = ['AAPL', 'MSFT','F']
@@ -80,13 +84,14 @@ test = stock_history_finder(tickers)
 returns = test.get_ann_returns()
 vols = test.get_vols()
 cov_mat = test.get_cov_mat()
+corr_mat = test.get_corr_mat()
 latest_prices = test.get_latest_prices()
 latest_prices = [latest_prices[ticker] for ticker in tickers]
 #testing out a simulation
-test_sim = BS_sim(latest_prices, [0,0,0], cov_mat, 1)
-test_output = test_sim.simulate(sim_number = 100)
+test_sim = BS_sim([100,200], [0,0], [0.25,0.25] ,[[1,-0.5],[-0.5,1]], 1)
+test_output = test_sim.simulate(sim_number = 5000)
 plt.plot(test_output[0])
 plt.show()
-#trying to compute a put price for AAPL - it is too low
-payoffs = np.maximum(264.16-test_output[0][-1],0)
-print(sum(payoffs)/100)
+#testing out put price, should be near 9.75
+payoffs = np.maximum(100-test_output[0][-1],0)
+print(sum(payoffs)/5000)
