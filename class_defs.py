@@ -53,9 +53,20 @@ class BS_sim:
         self.maturity = maturity
         self.steps = int(252*maturity)
     
-    def simulate(self):
-        #write simulation code
-        return None
+    def simulate(self, sim_number):
+        dt = self.maturity/self.steps
+        n_stocks = len(self.initial_stock_prices) 
+        prices = np.zeros((n_stocks,self.steps,sim_number))  #np array of zeros where the simulated prices will go
+        # structure of prices is the following: 
+        # prices[i] gives you the price paths of the stock at index i
+        # the next level, prices[i][j] gives all the simulated prices of the stock at index i at time j (so if you want the prices at maturity, type prices[i][-1]) 
+        
+        for stock in range(n_stocks):
+            prices[stock][0] = self.initial_stock_prices[stock]  #populating with the initial stock prices
+        
+        #write actual simulation 
+        
+        return prices
 
 
 #testing things out
@@ -70,4 +81,11 @@ print(np.matrix(cov_mat))
 latest_prices = test.get_latest_prices()
 latest_prices = [latest_prices[ticker] for ticker in tickers]
 print(latest_prices)
-# print(np.zeros((2,3,3)))
+print("------------------")
+test_sim = BS_sim(latest_prices, [0,0,0], cov_mat, 0.5)
+test_output = test_sim.simulate(5)
+print(test_output)
+# test_mat = np.zeros((2,3,3))
+# print(test_mat)
+# print(test_mat[0])
+# print(test_mat[0][0])
