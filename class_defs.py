@@ -2,6 +2,7 @@ from pandas_datareader import data
 import pandas as pd
 import numpy as np
 import datetime
+import matplotlib.pyplot as plt
 
 class stock_history_finder:
     """
@@ -47,13 +48,13 @@ class stock_history_finder:
 class BS_sim:
 
     def __init__(self, initial_stock_prices, returns, cov_mat, maturity):
-        self.cov_mat = cov_mat
+        self.cov_mat = np.array(cov_mat)
         self.initial_stock_prices = initial_stock_prices
         self.returns = returns
         self.maturity = maturity
         self.steps = int(252*maturity)
     
-    def simulate(self, sim_number):
+    def simulate(self, sim_number = 1000):
         dt = self.maturity/self.steps
         n_stocks = len(self.initial_stock_prices) 
         prices = np.zeros((n_stocks,self.steps,sim_number))  #np array of zeros where the simulated prices will go
@@ -65,28 +66,27 @@ class BS_sim:
             prices[stock][0] = self.initial_stock_prices[stock]  #populating with the initial stock prices
         
         for time in range(1,self.steps):
-            random_variables = np.random.multivariate_normal(returns, cov_mat, sim_number)
-            #insert actual BS equation
-        return random_variables
-
+            random_variables = np.random.multivariate_normal(self.returns, cov_mat, sim_number) #generating correlated random variables
+            for stock in range(n_stocks):
+                prices[stock][time] = prices[stock][time-1] + self.returns[stock]*prices[stock][time-1]*dt + np.sqrt((self.cov_mat[stock][stock]*252))*prices[stock][time-1]*random_variables[:,stock]
+        return prices
+#prices don't move quite enough
+#It has something to do with the covariance matrix
+# other than that, the simulation part is almost done
 
 #testing things out
 tickers = ['AAPL', 'MSFT','F']
 test = stock_history_finder(tickers)
 returns = test.get_ann_returns()
-print(returns)
 vols = test.get_vols()
-print(vols)
 cov_mat = test.get_cov_mat()
-print(np.matrix(cov_mat))
 latest_prices = test.get_latest_prices()
 latest_prices = [latest_prices[ticker] for ticker in tickers]
-print(latest_prices)
-print("------------------")
-test_sim = BS_sim(latest_prices, [0,0,0], cov_mat, 0.5)
-test_output = test_sim.simulate(5)
-print(test_output)
-# test_mat = np.zeros((2,3,3))
-# print(test_mat)
-# print(test_mat[0])
-# print(test_mat[0][0])
+#testing out a simulation
+test_sim = BS_sim(latest_prices, [0,0,0], cov_mat, 1)
+test_output = test_sim.simulate(sim_number = 100)
+plt.plot(test_output[0])
+plt.show()
+#trying to compute a put price for AAPL - it is too low
+payoffs = np.maximum(264.16-test_output[0][-1],0)
+print(sum(payoffs)/100)
