@@ -123,7 +123,7 @@ class AtlasOption:
         discounted_payoffs = np.exp(-r*self.maturity) * payoffs_dollars
         avg_disc_payoff = np.average(discounted_payoffs)
         
-        return avg_disc_payoff, self.maturity
+        return avg_disc_payoff
 
 #testing things out
 tickers = ['AAPL','MSFT','AMZN','VOO']
