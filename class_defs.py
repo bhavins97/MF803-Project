@@ -10,7 +10,7 @@ class stock_history_finder:
     """
     def __init__(self, tickers):
         """
-        tickers: list
+        tickers: list (last element of the list should be the index on which the payoff will be based)
         """
         self.tickers =  tickers
     
@@ -76,6 +76,7 @@ class BS_sim:
             random_variables = np.random.multivariate_normal(self.returns, self.corr_mat, sim_number) #generating correlated random variables
             for stock in range(n_stocks):
                 prices[stock][time] = prices[stock][time-1] + self.returns[stock]*prices[stock][time-1]*dt + self.vols[stock]*prices[stock][time-1]*np.sqrt(dt)*random_variables[:,stock]
+        
         return prices
 
 class AtlasOption:
@@ -87,6 +88,7 @@ class AtlasOption:
         self.n1 = n1
         self.n2 = n2
         self.strike = strike
+        self.maturity = len((paths[0].transpose())[0])/252
     
     def get_price(self):
         initial_prices = np.array([self.stock_prices[i][0] for i in range(len(self.stock_prices))])
@@ -116,16 +118,15 @@ class AtlasOption:
         
         ### TEMPORARY DEFS###############
         r = 0
-        T=0
         #########################
         
-        discounted_payoffs = np.exp(-r*T) * payoffs_dollars
+        discounted_payoffs = np.exp(-r*self.maturity) * payoffs_dollars
         avg_disc_payoff = np.average(discounted_payoffs)
         
-        return avg_disc_payoff
+        return avg_disc_payoff, self.maturity
 
 #testing things out
-tickers = ['AAPL','MSFT','AMZN','SPY']
+tickers = ['AAPL','MSFT','AMZN','VOO']
 test = stock_history_finder(tickers)
 returns = test.get_ann_returns()
 vols = test.get_vols()
@@ -148,5 +149,15 @@ test_output = test_sim.simulate(sim_number = 5000)
 #     payoffs = np.maximum(float(latest_prices[stock])-test_output[stock][-1],0)
 #     print(sum(payoffs)/5000)
 
-test_pricer = AtlasOption(1,1,1.1,test_output)
-print(test_pricer.get_price())
+test_pricer_00 = AtlasOption(0,0,1,test_output)
+print(test_pricer_00.get_price())
+test_pricer_01 = AtlasOption(0,1,1,test_output)
+print(test_pricer_01.get_price())
+test_pricer_10 = AtlasOption(1,0,1,test_output)
+print(test_pricer_10.get_price())
+test_pricer_11 = AtlasOption(1,1,1,test_output)
+print(test_pricer_11.get_price())
+test_pricer_20 = AtlasOption(2,0,1,test_output)
+print(test_pricer_20.get_price())
+test_pricer_02 = AtlasOption(0,2,1,test_output)
+print(test_pricer_02.get_price())
