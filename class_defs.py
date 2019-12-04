@@ -22,7 +22,8 @@ class stock_history_finder:
 
     def get_latest_prices(self):
         prices = self.get_prices()
-        return prices.tail(1)
+        last_prices = prices.tail(1)
+        return [last_prices[ticker] for ticker in self.tickers]
 
     def get_returns_data(self):
         adj_close_prices = self.get_prices()
@@ -77,16 +78,46 @@ class BS_sim:
                 prices[stock][time] = prices[stock][time-1] + self.returns[stock]*prices[stock][time-1]*dt + self.vols[stock]*prices[stock][time-1]*np.sqrt(dt)*random_variables[:,stock]
         return prices
 
+class AtlasOption:
+
+    def __init__(self, n1, n2, strike, paths):
+        self.paths = paths
+        self.index_prices = paths[-1]
+        self.stock_prices = paths[:-1]
+        self.n1 = n1
+        self.n2 = n2
+        self.strike = strike
+    
+    def get_price(self):
+        initial_prices = np.array([self.stock_prices[i][0] for i in range(len(self.stock_prices))])
+        final_prices = np.array([self.stock_prices[i][-1] for i in range(len(self.stock_prices))])
+        returns = final_prices/initial_prices
+        #group retuns from each individual simulation together and remove n1 and n2
+        sim_grouped_returns = returns.transpose() #grouping returns from each simulation together
+        sorted_grouped_returns  = np.array([np.sort(sim_grouped_returns[i]) for i in range(len(sim_grouped_returns))])    #sorting each subarray
+        #below, taking out n1 stocks from the top and n2 from the bottom
+        if self.n1 != 0:
+            filtered_returns = np.array([sorted_grouped_returns[i][self.n2:-self.n1] for i in range(len(sorted_grouped_returns))])
+        elif self.n1 == 0 and self.n2 ==0:
+            filtered_returns = sorted_grouped_returns
+        elif self.n1 == 0:
+            filtered_returns = np.array([sorted_grouped_returns[i][self.n2:] for i in range(len(sorted_grouped_returns))])
+        returns_minus_strike = filtered_returns - self.strike
+        #now sum the returns and divide by n-(n1+n2)
+        #take the max(0,payoff function)
+        #convert percentages into dollars (based on SPY?)
+        #discount and average
+        return None
 
 #testing things out
-tickers = ['AAPL','MSFT','SPY','XLF']
+tickers = ['AAPL','MSFT','AMZN','SPY']
 test = stock_history_finder(tickers)
 returns = test.get_ann_returns()
 vols = test.get_vols()
 cov_mat = test.get_cov_mat()
 corr_mat = test.get_corr_mat()
 latest_prices = test.get_latest_prices()
-latest_prices = [latest_prices[ticker] for ticker in tickers]
+#latest_prices = [latest_prices[ticker] for ticker in tickers]
 #testing out a simulation
 test_sim = BS_sim(latest_prices,len(tickers)*[0] , vols ,corr_mat, 0.5)
 test_output = test_sim.simulate(sim_number = 5000)
@@ -97,6 +128,10 @@ test_output = test_sim.simulate(sim_number = 5000)
 # plt.plot(test_output[2])
 # plt.show()
 
-for stock in range(len(tickers)):
-    payoffs = np.maximum(float(latest_prices[stock])-test_output[stock][-1],0)
-    print(sum(payoffs)/5000)
+# testing at the money put prices
+# for stock in range(len(tickers)):
+#     payoffs = np.maximum(float(latest_prices[stock])-test_output[stock][-1],0)
+#     print(sum(payoffs)/5000)
+
+test_pricer = AtlasOption(1,1,1,test_output)
+print(test_pricer.get_price())
