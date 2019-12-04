@@ -82,7 +82,7 @@ class AtlasOption:
 
     def __init__(self, n1, n2, strike, paths):
         self.paths = paths
-        self.index_prices = paths[-1]
+        self.index_prices = paths[-1][-1]
         self.stock_prices = paths[:-1]
         self.n1 = n1
         self.n2 = n2
@@ -92,9 +92,10 @@ class AtlasOption:
         initial_prices = np.array([self.stock_prices[i][0] for i in range(len(self.stock_prices))])
         final_prices = np.array([self.stock_prices[i][-1] for i in range(len(self.stock_prices))])
         returns = final_prices/initial_prices
-        #group retuns from each individual simulation together and remove n1 and n2
+
         sim_grouped_returns = returns.transpose() #grouping returns from each simulation together
         sorted_grouped_returns  = np.array([np.sort(sim_grouped_returns[i]) for i in range(len(sim_grouped_returns))])    #sorting each subarray
+        
         #below, taking out n1 stocks from the top and n2 from the bottom
         if self.n1 != 0:
             filtered_returns = np.array([sorted_grouped_returns[i][self.n2:-self.n1] for i in range(len(sorted_grouped_returns))])
@@ -102,12 +103,26 @@ class AtlasOption:
             filtered_returns = sorted_grouped_returns
         elif self.n1 == 0:
             filtered_returns = np.array([sorted_grouped_returns[i][self.n2:] for i in range(len(sorted_grouped_returns))])
-        returns_minus_strike = filtered_returns - self.strike
-        #now sum the returns and divide by n-(n1+n2)
-        #take the max(0,payoff function)
-        #convert percentages into dollars (based on SPY?)
-        #discount and average
-        return None
+
+        returns_minus_strike = filtered_returns - self.strike #subtracting the strike
+
+        sum_term = np.array([np.sum(returns_minus_strike[i]) for i in range(len(returns_minus_strike))]) #summing up the remaining stocks in the basket
+        
+        payoff_term_1 = sum_term/(len(self.stock_prices)-(self.n1+self.n2)) #dividing by the number of remaining stocks
+        
+        payoffs = np.maximum(payoff_term_1, np.zeros(len(payoff_term_1))) #taking rhe max of 0 and the other payoff term
+        
+        payoffs_dollars = payoffs * self.index_prices #converting perecentage payoffs to dollar amounts
+        
+        ### TEMPORARY DEFS###############
+        r = 0
+        T=0
+        #########################
+        
+        discounted_payoffs = np.exp(-r*T) * payoffs_dollars
+        avg_disc_payoff = np.average(discounted_payoffs)
+        
+        return avg_disc_payoff
 
 #testing things out
 tickers = ['AAPL','MSFT','AMZN','SPY']
@@ -133,5 +148,5 @@ test_output = test_sim.simulate(sim_number = 5000)
 #     payoffs = np.maximum(float(latest_prices[stock])-test_output[stock][-1],0)
 #     print(sum(payoffs)/5000)
 
-test_pricer = AtlasOption(1,1,1,test_output)
+test_pricer = AtlasOption(1,1,1.1,test_output)
 print(test_pricer.get_price())
