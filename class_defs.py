@@ -36,6 +36,7 @@ class stock_history_finder:
         return ann_avg_returns
 
     def get_vols(self):
+        #could add premium over realized vol
         returns = self.get_returns_data()
         vols = returns.std()
         ann_vols = vols * np.sqrt(252)
@@ -103,7 +104,7 @@ class AtlasOption:
             filtered_returns = np.array([sorted_grouped_returns[i][self.n2:-self.n1] for i in range(len(sorted_grouped_returns))])
         elif self.n1 == 0 and self.n2 ==0:
             filtered_returns = sorted_grouped_returns
-        elif self.n1 == 0:
+        else:
             filtered_returns = np.array([sorted_grouped_returns[i][self.n2:] for i in range(len(sorted_grouped_returns))])
 
         returns_minus_strike = filtered_returns - self.strike #subtracting the strike
@@ -116,14 +117,22 @@ class AtlasOption:
         
         payoffs_dollars = payoffs * self.index_prices #converting perecentage payoffs to dollar amounts
         
-        ### TEMPORARY DEFS###############
+        ### TEMPORARY DEF ########
         r = 0
-        #########################
+        ##########################
         
         discounted_payoffs = np.exp(-r*self.maturity) * payoffs_dollars
         avg_disc_payoff = np.average(discounted_payoffs)
         
         return avg_disc_payoff
+
+##### THINGS TO DO! #######
+# 1. Validation (testing), try to get as many different test cases as possible (where we know what the output should be). Price a basket on OVME on Bloomberg
+# 2. Get an example going. Play around with changing n1 and n2, get a 3d graph of price with different n1 and n2. Plot price against strike
+# 3. Look into premium of implied over realized vol. 
+# ADD ANYTHING ELSE YOU CAN THINK OF THAT COULD BE USEFUL
+
+
 
 #testing things out
 tickers = ['AAPL','MSFT','AMZN','VOO']
