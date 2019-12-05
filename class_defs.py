@@ -131,6 +131,8 @@ class AtlasOption:
 # 2. Get an example going. Play around with changing n1 and n2, get a 3d graph of price with different n1 and n2. Plot price against strike
 # 3. Look into premium of implied over realized vol and maybe add a premium to our calculation
 # 4. Look at what happens when the basket is made up of assets that are highly correlated vs low/negative(?) correlation
+# 5. Try using risk free rate as the expected return in the BS model
+
 # ADD ANYTHING ELSE YOU CAN THINK OF THAT COULD BE USEFUL
 
 
