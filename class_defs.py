@@ -129,7 +129,8 @@ class AtlasOption:
 ##### THINGS TO DO! #######
 # 1. Validation (testing), try to get as many different test cases as possible (where we know what the output should be). Price a basket on OVME on Bloomberg
 # 2. Get an example going. Play around with changing n1 and n2, get a 3d graph of price with different n1 and n2. Plot price against strike
-# 3. Look into premium of implied over realized vol. 
+# 3. Look into premium of implied over realized vol and maybe add a premium to our calculation
+# 4. Look at what happens when the basket is made up of assets that are highly correlated vs low/negative(?) correlation
 # ADD ANYTHING ELSE YOU CAN THINK OF THAT COULD BE USEFUL
 
 
