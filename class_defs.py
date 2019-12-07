@@ -175,7 +175,7 @@ class AtlasPlot:
             
 ##### THINGS TO DO! #######
 # 1. Validation (testing), try to get as many different test cases as possible (where we know what the output should be). Price a basket on OVME on Bloomberg
-# 2. Get an example going. Play around with changing n1 and n2, get a 3d graph of price with different n1 and n2. Plot price against strike
+#DONE# 2. Get an example going. Play around with changing n1 and n2, get a 3d graph of price with different n1 and n2. Plot price against strike
 # 3. Look into premium of implied over realized vol and maybe add a premium to our calculation
 # 4. Look at what happens when the basket is made up of assets that are highly correlated vs low/negative(?) correlation
 # 5. Try using risk free rate as the expected return in the BS model
@@ -234,8 +234,8 @@ test_plot = stock_history_finder(tickers_plot)
 sim_plot = BS_sim(test_plot.get_latest_prices(), len(tickers_plot)*[0], test_plot.get_vols(), test_plot.get_corr_mat(), 1)
 output_plot = sim_plot.simulate(5000)
 
-#display the plots
+#display the plots - only display one at a time!
 atlas_plot = AtlasPlot(tickers_plot, output_plot)
 atlas_plot.plot_n1_n2_price() #3d plot of n1, n2, and price
-atlas_plot.plot_strike_price() #2d plot of strike and price
-#others?
+#atlas_plot.plot_strike_price() #2d plot of strike and price
+###others?
