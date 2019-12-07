@@ -3,6 +3,8 @@ import pandas as pd
 import numpy as np
 import datetime
 import matplotlib.pyplot as plt
+from mpl_toolkits import mplot3d
+from matplotlib import cm
 
 class stock_history_finder:
     """
@@ -125,7 +127,52 @@ class AtlasOption:
         avg_disc_payoff = np.average(discounted_payoffs)
         
         return avg_disc_payoff
-
+    
+class AtlasPlot:
+    
+    def __init__(self, ticker_list, sim):
+        self.tickers = ticker_list
+        self.simulation = sim
+        
+    def plot_n1_n2_price(self): #3d plot of n1, n2, and price
+        
+        #n1 and n2 are the x and y axes
+        x = range(len(self.tickers)//2 + 1) #n1 and n2 shouldn't be bigger than half of the basket, right?
+        y = range(len(self.tickers)//2 + 1) #we don't want n1+n2 > len(tickers)
+        #price is the z axis
+        z = np.zeros((len(x),len(y)))
+        #z is a two dimensional array of prices
+        for i in range(len(x)):
+            for j in range(len(y)):
+                atlas_option_ij = AtlasOption(i,j,1,self.simulation)
+                z[i][j] = atlas_option_ij.get_price()
+        
+        #plot commands
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        X, Y = np.meshgrid(x, y)
+        ax.set_title('Relationship of price to choices of n1 and n2')
+        ax.set_xlabel('n2')
+        ax.set_ylabel('n1')
+        ax.set_zlabel('price')
+        ax.plot_surface(X,Y,z) #we can experiment with colors, shading, etc.
+        plt.show()
+        
+    def plot_strike_price(self): #2d plot of strike and price
+        
+        #strike is the x axis, price is the y axis
+        x = np.linspace(0,1,20) #using a bunch of different arbitrary values for strike
+        y = np.zeros(len(x))
+        for i in range(len(x)):
+            atlas_option_i = AtlasOption(5,5,x[i],self.simulation) #arbitrarily picked n1=n2=5
+            y[i] = atlas_option_i.get_price()
+        #plot commands
+        plt.xlabel('strike')
+        plt.ylabel('price')
+        plt.title('Relationship of strike to price')
+        plt.plot(x,y)
+        plt.show()
+            
 ##### THINGS TO DO! #######
 # 1. Validation (testing), try to get as many different test cases as possible (where we know what the output should be). Price a basket on OVME on Bloomberg
 # 2. Get an example going. Play around with changing n1 and n2, get a 3d graph of price with different n1 and n2. Plot price against strike
@@ -138,6 +185,7 @@ class AtlasOption:
 
 
 #testing things out
+"""
 tickers = ['AAPL','MSFT','AMZN','VOO']
 test = stock_history_finder(tickers)
 returns = test.get_ann_returns()
@@ -149,6 +197,7 @@ latest_prices = test.get_latest_prices()
 #testing out a simulation
 test_sim = BS_sim(latest_prices,len(tickers)*[0] , vols ,corr_mat, 0.5)
 test_output = test_sim.simulate(sim_number = 5000)
+"""
 # plt.plot(test_output[0])
 # plt.show()
 # plt.plot(test_output[1])
@@ -161,6 +210,7 @@ test_output = test_sim.simulate(sim_number = 5000)
 #     payoffs = np.maximum(float(latest_prices[stock])-test_output[stock][-1],0)
 #     print(sum(payoffs)/5000)
 
+"""
 test_pricer_00 = AtlasOption(0,0,1,test_output)
 print(test_pricer_00.get_price())
 test_pricer_01 = AtlasOption(0,1,1,test_output)
@@ -173,3 +223,19 @@ test_pricer_20 = AtlasOption(2,0,1,test_output)
 print(test_pricer_20.get_price())
 test_pricer_02 = AtlasOption(0,2,1,test_output)
 print(test_pricer_02.get_price())
+"""
+
+
+#plots
+
+#re-running a simulation with more tickers to get more n1/n2 values
+tickers_plot = ['SNY', 'TJX', 'STT', 'RTN', 'SAM', 'TRIP', 'DNKN', 'CVS', 'EV', 'BFAM', 'W', 'THG', 'IRM', 'AKAM', 'IRBT', 'HMHC', 'GOLF', 'ATHN', 'VOO'] 
+test_plot = stock_history_finder(tickers_plot)
+sim_plot = BS_sim(test_plot.get_latest_prices(), len(tickers_plot)*[0], test_plot.get_vols(), test_plot.get_corr_mat(), 1)
+output_plot = sim_plot.simulate(5000)
+
+#display the plots
+atlas_plot = AtlasPlot(tickers_plot, output_plot)
+atlas_plot.plot_n1_n2_price() #3d plot of n1, n2, and price
+atlas_plot.plot_strike_price() #2d plot of strike and price
+#others?
