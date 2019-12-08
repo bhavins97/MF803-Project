@@ -189,19 +189,21 @@ class AtlasPlot:
 
 
 #testing things out
-"""
-#tickers = ['AAPL','MSFT', 'F', 'AMZN','VOO']
-tickers = ['AAPL','TSLA','VOO']
-test = stock_history_finder(tickers)
-vols = test.get_vols()
-corr_mat = test.get_corr_mat()
-latest_prices = test.get_latest_prices()
-#testing out a simulation
-test_sim = BS_sim(latest_prices, 0.0184 , vols ,corr_mat, 1)
-test_output = test_sim.simulate(sim_number = 5000)
 
-test_atlas = AtlasOption(0,0,1,test_output)
-print(test_atlas.get_price())
+# tickers = ['AAPL','MSFT', 'F', 'AMZN','VOO']
+# tickers = ['AAPL','TSLA','BND','VOO']
+# test = stock_history_finder(tickers)
+# vols = test.get_vols()
+# print(vols)
+# corr_mat = test.get_corr_mat()
+# print(corr_mat)
+# latest_prices = test.get_latest_prices()
+# #testing out a simulation
+# test_sim = BS_sim(latest_prices, 0.0184 , vols ,corr_mat, 1)
+# test_output = test_sim.simulate(sim_number = 5000)
+
+# test_atlas = AtlasOption(0,0,1,test_output)
+# print(test_atlas.get_price())
 
 # plt.plot(test_output[0])
 # plt.show()
@@ -214,7 +216,7 @@ print(test_atlas.get_price())
 # for stock in range(len(tickers)):
 #     payoffs = np.exp(-0.0184) * np.maximum(float(latest_prices[stock])-test_output[stock][-1],0)
 #     print(sum(payoffs)/5000)
-"""
+
 
 #plots
 """
