@@ -20,7 +20,9 @@ class stock_history_finder:
         today = datetime.datetime.today()
         today = today.strftime('%Y-%m-%d')
         prices = data.DataReader(self.tickers,'yahoo', '2015-01-01', today )
-        return prices['Adj Close']
+        prices = prices['Adj Close']
+        prices = prices[self.tickers]
+        return prices
 
     def get_latest_prices(self):
         prices = self.get_prices()
@@ -56,10 +58,10 @@ class stock_history_finder:
 
 class BS_sim:
 
-    def __init__(self, initial_stock_prices, returns, vols, corr_mat, maturity):
+    def __init__(self, initial_stock_prices, rf_rate, vols, corr_mat, maturity):
         self.corr_mat = np.array(corr_mat)
         self.initial_stock_prices = initial_stock_prices
-        self.returns = returns
+        self.rf_rate = rf_rate
         self.maturity = maturity
         self.steps = int(252*maturity)
         self.vols = vols
@@ -76,9 +78,11 @@ class BS_sim:
             prices[stock][0] = self.initial_stock_prices[stock]  #populating with the initial stock prices
         
         for time in range(1,self.steps):
-            random_variables = np.random.multivariate_normal(self.returns, self.corr_mat, sim_number) #generating correlated random variables
+            #random_variables = np.random.multivariate_normal(n_stocks*[self.rf_rate], self.corr_mat, sim_number) #generating correlated random variables
+            random_variables = np.random.multivariate_normal(n_stocks*[0], self.corr_mat, sim_number) #generating correlated random variables
             for stock in range(n_stocks):
-                prices[stock][time] = prices[stock][time-1] + self.returns[stock]*prices[stock][time-1]*dt + self.vols[stock]*prices[stock][time-1]*np.sqrt(dt)*random_variables[:,stock]
+                #prices[stock][time] = prices[stock][time-1] + self.rf_rate*prices[stock][time-1]*dt + self.vols[stock]*prices[stock][time-1]*np.sqrt(dt)*random_variables[:,stock]
+                prices[stock][time] = prices[stock][time-1] * np.exp((self.rf_rate - ((self.vols[stock]**2)/2) ) * dt + self.vols[stock]*np.sqrt(dt)* random_variables[:,stock])
         
         return prices
 
@@ -120,7 +124,7 @@ class AtlasOption:
         payoffs_dollars = payoffs * self.index_prices #converting perecentage payoffs to dollar amounts
         
         ### TEMPORARY DEF ########
-        r = 0
+        r = 0.0184
         ##########################
         
         discounted_payoffs = np.exp(-r*self.maturity) * payoffs_dollars
@@ -161,7 +165,7 @@ class AtlasPlot:
     def plot_strike_price(self): #2d plot of strike and price
         
         #strike is the x axis, price is the y axis
-        x = np.linspace(0,1,20) #using a bunch of different arbitrary values for strike
+        x = np.linspace(0.5,1.5,20) #using a bunch of different arbitrary values for strike
         y = np.zeros(len(x))
         for i in range(len(x)):
             atlas_option_i = AtlasOption(5,5,x[i],self.simulation) #arbitrarily picked n1=n2=5
@@ -172,13 +176,13 @@ class AtlasPlot:
         plt.title('Relationship of strike to price')
         plt.plot(x,y)
         plt.show()
-            
+
 ##### THINGS TO DO! #######
 # 1. Validation (testing), try to get as many different test cases as possible (where we know what the output should be). Price a basket on OVME on Bloomberg
 #DONE# 2. Get an example going. Play around with changing n1 and n2, get a 3d graph of price with different n1 and n2. Plot price against strike
 # 3. Look into premium of implied over realized vol and maybe add a premium to our calculation
 # 4. Look at what happens when the basket is made up of assets that are highly correlated vs low/negative(?) correlation
-# 5. Try using risk free rate as the expected return in the BS model
+#DONE# 5. Try using risk free rate as the expected return in the BS model
 
 # ADD ANYTHING ELSE YOU CAN THINK OF THAT COULD BE USEFUL
 
@@ -186,18 +190,19 @@ class AtlasPlot:
 
 #testing things out
 """
-tickers = ['AAPL','MSFT','AMZN','VOO']
+#tickers = ['AAPL','MSFT', 'F', 'AMZN','VOO']
+tickers = ['AAPL','TSLA','VOO']
 test = stock_history_finder(tickers)
-returns = test.get_ann_returns()
 vols = test.get_vols()
-cov_mat = test.get_cov_mat()
 corr_mat = test.get_corr_mat()
 latest_prices = test.get_latest_prices()
-#latest_prices = [latest_prices[ticker] for ticker in tickers]
 #testing out a simulation
-test_sim = BS_sim(latest_prices,len(tickers)*[0] , vols ,corr_mat, 0.5)
+test_sim = BS_sim(latest_prices, 0.0184 , vols ,corr_mat, 1)
 test_output = test_sim.simulate(sim_number = 5000)
-"""
+
+test_atlas = AtlasOption(0,0,1,test_output)
+print(test_atlas.get_price())
+
 # plt.plot(test_output[0])
 # plt.show()
 # plt.plot(test_output[1])
@@ -207,35 +212,21 @@ test_output = test_sim.simulate(sim_number = 5000)
 
 # testing at the money put prices
 # for stock in range(len(tickers)):
-#     payoffs = np.maximum(float(latest_prices[stock])-test_output[stock][-1],0)
+#     payoffs = np.exp(-0.0184) * np.maximum(float(latest_prices[stock])-test_output[stock][-1],0)
 #     print(sum(payoffs)/5000)
-
 """
-test_pricer_00 = AtlasOption(0,0,1,test_output)
-print(test_pricer_00.get_price())
-test_pricer_01 = AtlasOption(0,1,1,test_output)
-print(test_pricer_01.get_price())
-test_pricer_10 = AtlasOption(1,0,1,test_output)
-print(test_pricer_10.get_price())
-test_pricer_11 = AtlasOption(1,1,1,test_output)
-print(test_pricer_11.get_price())
-test_pricer_20 = AtlasOption(2,0,1,test_output)
-print(test_pricer_20.get_price())
-test_pricer_02 = AtlasOption(0,2,1,test_output)
-print(test_pricer_02.get_price())
-"""
-
 
 #plots
-
+"""
 #re-running a simulation with more tickers to get more n1/n2 values
 tickers_plot = ['SNY', 'TJX', 'STT', 'RTN', 'SAM', 'TRIP', 'DNKN', 'CVS', 'EV', 'BFAM', 'W', 'THG', 'IRM', 'AKAM', 'IRBT', 'HMHC', 'GOLF', 'ATHN', 'VOO'] 
 test_plot = stock_history_finder(tickers_plot)
-sim_plot = BS_sim(test_plot.get_latest_prices(), len(tickers_plot)*[0], test_plot.get_vols(), test_plot.get_corr_mat(), 1)
+sim_plot = BS_sim(test_plot.get_latest_prices(), 0.0184, test_plot.get_vols(), test_plot.get_corr_mat(), 1)
 output_plot = sim_plot.simulate(5000)
 
 #display the plots - only display one at a time!
 atlas_plot = AtlasPlot(tickers_plot, output_plot)
 atlas_plot.plot_n1_n2_price() #3d plot of n1, n2, and price
-#atlas_plot.plot_strike_price() #2d plot of strike and price
+atlas_plot.plot_strike_price() #2d plot of strike and price
 ###others?
+"""
