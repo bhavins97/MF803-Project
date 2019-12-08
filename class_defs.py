@@ -67,6 +67,11 @@ class BS_sim:
         self.vols = vols
     
     def simulate(self, sim_number = 10000):
+
+        if self.maturity == 0:
+            """ If maturity is 0, then it just returns the inital prices"""
+            return np.array([sim_number*[self.initial_stock_prices[stock]] for stock in range(len(self.initial_stock_prices)) ])
+        
         dt = self.maturity/self.steps
         n_stocks = len(self.initial_stock_prices) 
         prices = np.zeros((n_stocks,self.steps,sim_number))  #np array of zeros where the simulated prices will go
