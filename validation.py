@@ -30,7 +30,7 @@ test_paths = test_sim.simulate()
 
 
 """
-Testing out simple call prices for these stocks -  comparing to theoretical BS price
+Testing out simple at the money call and put prices for these stocks -  comparing to theoretical BS price
 They are all very similar (used https://www.erieri.com/blackscholes to compare)
 """
 def call_and_put_px(tickers, paths, latest_prices):
@@ -45,14 +45,41 @@ def call_and_put_px(tickers, paths, latest_prices):
 call_and_put_px(tickers, test_paths, latest_prices)
 
 """
-Setting maturity to 0 and vols to 0
+Setting maturity to 0 and vols to 0. Should see put and call prices go to 0.
 """
+print("Should see 0s")
 test_sim_0_mat = BS_sim(latest_prices, 0.0184 , vols ,corr_mat, 0)
 test_paths_0_mat = test_sim_0_mat.simulate()
 call_and_put_px(tickers, test_paths_0_mat, latest_prices)
 
+print("Should see 0s for puts, small price for calls")
 test_sim_0_vol = BS_sim(latest_prices, 0.0184 , len(latest_prices)*[0] ,corr_mat, 1)
-test_paths_0_vol = test_sim_0_mat.simulate()
+test_paths_0_vol = test_sim_0_vol.simulate()
 call_and_put_px(tickers, test_paths_0_vol, latest_prices)
-# test_atlas = AtlasOption(0,0,1,test_output)
-# print(test_atlas.get_price())
+
+print("Should see 0s")
+test_sim_0_ret_vol = BS_sim(latest_prices, 0, len(latest_prices)*[0] ,corr_mat, 1)
+test_paths_0_ret_vol = test_sim_0_ret_vol.simulate()
+call_and_put_px(tickers, test_paths_0_ret_vol, latest_prices)
+
+"""
+Testing atlas prices now that we know the simulation class is working
+"""
+print("Should see decreasing numbers:")
+print(AtlasOption(0,0,1,test_paths).get_price())
+print(AtlasOption(1,0,1,test_paths).get_price())
+print(AtlasOption(2,0,1,test_paths).get_price())
+print(AtlasOption(3,0,1,test_paths).get_price())
+print("Should see increasing numbers:")
+print(AtlasOption(0,0,1,test_paths).get_price())
+print(AtlasOption(0,1,1,test_paths).get_price())
+print(AtlasOption(0,2,1,test_paths).get_price())
+print(AtlasOption(0,3,1,test_paths).get_price())
+print("Should see 0")
+print(AtlasOption(0,0,1,test_paths_0_mat).get_price())
+print("Should see approximately 5.37 = 289.19 * (np.exp(0.0184)-1)")
+print(AtlasOption(0,0,1,test_paths_0_vol).get_price())
+print("Should see price of the index")
+print(AtlasOption(0,0,0,test_paths_0_mat).get_price())
+print("Should see 294.56 = 289.19 * np.exp(0.0184)")
+print(AtlasOption(0,0,0,test_paths_0_vol).get_price())
