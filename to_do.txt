@@ -6,3 +6,8 @@
 #DONE# 5. Try using risk free rate as the expected return in the BS model
 
 # ADD ANYTHING ELSE YOU CAN THINK OF THAT COULD BE USEFUL
+
+#LOWER PRIORITY STUFF
+#6. Improve runtime - multiprocessing will be the easiest win. Cython and numba are other possibilities
+#7. Exception handling
+#8. Code documentation
