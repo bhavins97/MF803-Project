@@ -134,22 +134,26 @@ class AtlasOption:
     
 class AtlasPlot:
     
-    def __init__(self, ticker_list, sim):
+    def __init__(self, ticker_list):
         self.tickers = ticker_list
-        self.simulation = sim
+        self.history = stock_history_finder(self.tickers)
         
     def plot_n1_n2_price(self): #3d plot of n1, n2, and price
         
+        #first, we need a simulation of the tickers
+        sim_plot = BS_sim(self.history.get_latest_prices(), 0.0184, self.history.get_vols(), self.history.get_corr_mat(), 1)
+        output_plot = sim_plot.simulate(5000)
         #n1 and n2 are the x and y axes
-        x = range(len(self.tickers)//2 + 1) #n1 and n2 shouldn't be bigger than half of the basket, right?
-        y = range(len(self.tickers)//2 + 1) #we don't want n1+n2 > len(tickers)
+        x = range(len(self.tickers))
+        y = range(len(self.tickers)) 
         #price is the z axis
         z = np.zeros((len(x),len(y)))
         #z is a two dimensional array of prices
         for i in range(len(x)):
             for j in range(len(y)):
-                atlas_option_ij = AtlasOption(i,j,1,self.simulation)
-                z[i][j] = atlas_option_ij.get_price()
+                if i+j < len(self.tickers): #we need n1+n2 < len(tickers)
+                    atlas_option_ij = AtlasOption(i,j,1,output_plot)
+                    z[i][j] = atlas_option_ij.get_price()
         
         #plot commands
         fig = plt.figure()
@@ -164,16 +168,42 @@ class AtlasPlot:
         
     def plot_strike_price(self): #2d plot of strike and price
         
+        #first, we need a simulation of the tickers
+        sim_plot = BS_sim(self.history.get_latest_prices(), 0.0184, self.history.get_vols(), self.history.get_corr_mat(), 1)
+        output_plot = sim_plot.simulate(5000)
         #strike is the x axis, price is the y axis
         x = np.linspace(0.5,1.5,20) #using a bunch of different arbitrary values for strike
         y = np.zeros(len(x))
         for i in range(len(x)):
-            atlas_option_i = AtlasOption(5,5,x[i],self.simulation) #arbitrarily picked n1=n2=5
+            atlas_option_i = AtlasOption(5,5,x[i],output_plot) #arbitrarily picked n1=n2=5
             y[i] = atlas_option_i.get_price()
+            
         #plot commands
         plt.xlabel('strike')
         plt.ylabel('price')
         plt.title('Relationship of strike to price')
+        plt.plot(x,y)
+        plt.show()
+        
+    def plot_maturity_price(self): #2d plot of maturity and price
+        
+        #in order to plot price against maturity, we need a bunch of different simulations
+        #arbitrarily picking 0.5,1,2,5,10,30 year maturities
+        maturities = [0.5, 1, 2, 5, 10, 30]
+        
+        #maturity is the x axis, price is the y axis
+        x = np.linspace(0,30,6)
+        y = np.zeros(len(x))
+        for i in range(len(x)):
+            sim_plot = BS_sim(self.history.get_latest_prices(), 0.0184, self.history.get_vols(), self.history.get_corr_mat(), maturities[i])
+            output_plot = sim_plot.simulate(5000)
+            atlas_option_i = AtlasOption(5,5,1,output_plot) #arbitrarily picked n1=n2=5
+            y[i] = atlas_option_i.get_price()
+        
+        #plot commands
+        plt.xlabel('maturity')
+        plt.ylabel('price')
+        plt.title('Relationship of maturity to price')
         plt.plot(x,y)
         plt.show()
 
@@ -186,7 +216,10 @@ class AtlasPlot:
 
 # ADD ANYTHING ELSE YOU CAN THINK OF THAT COULD BE USEFUL
 
-
+#LOWER PRIORITY STUFF
+#6. Improve runtime - multiprocessing will be the easiest win. Cython and numba are other possibilities
+#7. Exception handling
+#8. Code documentation
 
 #testing things out
 
@@ -219,16 +252,14 @@ class AtlasPlot:
 
 
 #plots
-"""
-#re-running a simulation with more tickers to get more n1/n2 values
+
+#new ticker list to get more n1/n2 values
+#Update: I moved the simulations inside the AtlasPlot class
+#in order for the maturity plot to be able to handle multiple simulations
 tickers_plot = ['SNY', 'TJX', 'STT', 'RTN', 'SAM', 'TRIP', 'DNKN', 'CVS', 'EV', 'BFAM', 'W', 'THG', 'IRM', 'AKAM', 'IRBT', 'HMHC', 'GOLF', 'ATHN', 'VOO'] 
-test_plot = stock_history_finder(tickers_plot)
-sim_plot = BS_sim(test_plot.get_latest_prices(), 0.0184, test_plot.get_vols(), test_plot.get_corr_mat(), 1)
-output_plot = sim_plot.simulate(5000)
 
 #display the plots - only display one at a time!
-atlas_plot = AtlasPlot(tickers_plot, output_plot)
-atlas_plot.plot_n1_n2_price() #3d plot of n1, n2, and price
-atlas_plot.plot_strike_price() #2d plot of strike and price
-###others?
-"""
+atlas_plot = AtlasPlot(tickers_plot)
+#atlas_plot.plot_n1_n2_price() #3d plot of n1, n2, and price
+#atlas_plot.plot_strike_price() #2d plot of strike and price
+atlas_plot.plot_maturity_price() #2d plot of maturity and price
