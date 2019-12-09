@@ -223,10 +223,10 @@ class AtlasPlot:
 #new ticker list to get more n1/n2 values
 #Update: I moved the simulations inside the AtlasPlot class
 #in order for the maturity plot to be able to handle multiple simulations
-tickers_plot = ['SNY', 'TJX', 'STT', 'RTN', 'SAM', 'TRIP', 'DNKN', 'CVS', 'EV', 'BFAM', 'W', 'THG', 'IRM', 'AKAM', 'IRBT', 'HMHC', 'GOLF', 'ATHN', 'VOO'] 
+# tickers_plot = ['SNY', 'TJX', 'STT', 'RTN', 'SAM', 'TRIP', 'DNKN', 'CVS', 'EV', 'BFAM', 'W', 'THG', 'IRM', 'AKAM', 'IRBT', 'HMHC', 'GOLF', 'ATHN', 'VOO'] 
 
 #display the plots - only display one at a time!
-atlas_plot = AtlasPlot(tickers_plot)
+# atlas_plot = AtlasPlot(tickers_plot)
 #atlas_plot.plot_n1_n2_price() #3d plot of n1, n2, and price
 #atlas_plot.plot_strike_price() #2d plot of strike and price
-atlas_plot.plot_maturity_price() #2d plot of maturity and price
+# atlas_plot.plot_maturity_price() #2d plot of maturity and price
