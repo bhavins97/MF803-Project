@@ -216,48 +216,6 @@ class AtlasPlot:
         plt.plot(x,y)
         plt.show()
 
-##### THINGS TO DO! #######
-# 1. Validation (testing), try to get as many different test cases as possible (where we know what the output should be). Price a basket on OVME on Bloomberg
-#DONE# 2. Get an example going. Play around with changing n1 and n2, get a 3d graph of price with different n1 and n2. Plot price against strike
-# 3. Look into premium of implied over realized vol and maybe add a premium to our calculation
-# 4. Look at what happens when the basket is made up of assets that are highly correlated vs low/negative(?) correlation
-#DONE# 5. Try using risk free rate as the expected return in the BS model
-
-# ADD ANYTHING ELSE YOU CAN THINK OF THAT COULD BE USEFUL
-
-#LOWER PRIORITY STUFF
-#6. Improve runtime - multiprocessing will be the easiest win. Cython and numba are other possibilities
-#7. Exception handling
-#8. Code documentation
-
-#testing things out
-
-# tickers = ['AAPL','MSFT', 'F', 'AMZN','VOO']
-# tickers = ['AAPL','TSLA','BND','VOO']
-# test = stock_history_finder(tickers)
-# vols = test.get_vols()
-# print(vols)
-# corr_mat = test.get_corr_mat()
-# print(corr_mat)
-# latest_prices = test.get_latest_prices()
-# #testing out a simulation
-# test_sim = BS_sim(latest_prices, 0.0184 , vols ,corr_mat, 1)
-# test_output = test_sim.simulate(sim_number = 5000)
-
-# test_atlas = AtlasOption(0,0,1,test_output)
-# print(test_atlas.get_price())
-
-# plt.plot(test_output[0])
-# plt.show()
-# plt.plot(test_output[1])
-# plt.show()
-# plt.plot(test_output[2])
-# plt.show()
-
-# testing at the money put prices
-# for stock in range(len(tickers)):
-#     payoffs = np.exp(-0.0184) * np.maximum(float(latest_prices[stock])-test_output[stock][-1],0)
-#     print(sum(payoffs)/5000)
 
 
 #plots
