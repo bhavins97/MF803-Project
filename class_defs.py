@@ -87,7 +87,6 @@ class BS_sim:
             prices[stock][0] = self.initial_stock_prices[stock]  #populating with the initial stock prices
         
         for time in range(1,self.steps):
-            #random_variables = np.random.multivariate_normal(n_stocks*[self.rf_rate], self.corr_mat, sim_number) #generating correlated random variables
             random_variables = np.random.multivariate_normal(n_stocks*[0], self.corr_mat, sim_number) #generating correlated random variables
             for stock in range(n_stocks):
                 #prices[stock][time] = prices[stock][time-1] + self.rf_rate*prices[stock][time-1]*dt + self.vols[stock]*prices[stock][time-1]*np.sqrt(dt)*random_variables[:,stock]
