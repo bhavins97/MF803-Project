@@ -63,12 +63,21 @@ class BS_sim:
         self.initial_stock_prices = initial_stock_prices
         self.rf_rate = rf_rate
         self.maturity = maturity
-        self.steps = int(252*maturity)
+        self.steps = int(252*maturity)+1
         self.vols = vols
     
     def simulate(self, sim_number = 10000):
-        dt = self.maturity/self.steps
-        n_stocks = len(self.initial_stock_prices) 
+        
+        n_stocks = len(self.initial_stock_prices)
+
+        if self.maturity == 0:
+            """ If maturity is 0, then it just returns the inital prices"""
+            prices = np.zeros((n_stocks,1,sim_number))
+            for stock in range(n_stocks):
+                prices[stock][0] = self.initial_stock_prices[stock]
+            return prices
+        
+        dt = self.maturity/(self.steps-1) 
         prices = np.zeros((n_stocks,self.steps,sim_number))  #np array of zeros where the simulated prices will go
         # structure of prices is the following: 
         # prices[i] gives you the price paths of the stock at index i
@@ -95,7 +104,7 @@ class AtlasOption:
         self.n1 = n1
         self.n2 = n2
         self.strike = strike
-        self.maturity = len((paths[0].transpose())[0])/252
+        self.maturity = (len((paths[0].transpose())[0])-1)/252
     
     def get_price(self):
         initial_prices = np.array([self.stock_prices[i][0] for i in range(len(self.stock_prices))])
