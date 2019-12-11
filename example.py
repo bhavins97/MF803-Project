@@ -3,7 +3,7 @@ from class_defs import *
 """
 Let's get all the data and graphs we need for the example in this file
 """
-example_tickers = ['SNY', 'TJX', 'STT', 'RTN', 'SAM', 'TRIP', 'DNKN', 'CVS', 'EV', 'BFAM', 'W', 'THG', 'IRM', 'AKAM', 'IRBT', 'HMHC','GOLF', 'SPY'] 
+example_tickers = ['SNY', 'TJX', 'STT', 'RTN', 'SAM', 'TRIP', 'DNKN', 'CVS','EV', 'BFAM', 'W', 'THG', 'IRM', 'AKAM', 'IRBT', 'HMHC','GOLF', 'SPY'] 
 example = stock_history_finder(example_tickers)
 example_vols = example.get_vols()
 print(example_vols)

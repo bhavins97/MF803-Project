@@ -22,6 +22,8 @@ class stock_history_finder:
         prices = data.DataReader(self.tickers,'yahoo', '2015-01-01', today )
         prices = prices['Adj Close']
         prices = prices[self.tickers]
+        if prices.isnull().values.any() == True:
+            prices.ffill()
         return prices
 
     def get_latest_prices(self):
