@@ -96,10 +96,11 @@ class BS_sim:
 
 class AtlasOption:
 
-    def __init__(self, n1, n2, strike, paths):
+    def __init__(self, rf_rate, n1, n2, strike, paths):
         self.paths = paths
         self.index_prices = paths[-1][-1]
         self.stock_prices = paths[:-1]
+        self.rf = rf_rate
         self.n1 = n1
         self.n2 = n2
         self.strike = strike
@@ -127,15 +128,11 @@ class AtlasOption:
         
         payoff_term_1 = sum_term/(len(self.stock_prices)-(self.n1+self.n2)) #dividing by the number of remaining stocks
         
-        payoffs = np.maximum(payoff_term_1, np.zeros(len(payoff_term_1))) #taking rhe max of 0 and the other payoff term
+        payoffs = np.maximum(payoff_term_1, np.zeros(len(payoff_term_1))) #taking the max of 0 and the other payoff term
         
         payoffs_dollars = payoffs * self.index_prices #converting perecentage payoffs to dollar amounts
         
-        ### TEMPORARY DEF ########
-        r = 0.0184
-        ##########################
-        
-        discounted_payoffs = np.exp(-r*self.maturity) * payoffs_dollars
+        discounted_payoffs = np.exp(-self.rf*self.maturity) * payoffs_dollars
         avg_disc_payoff = np.average(discounted_payoffs)
         
         return avg_disc_payoff
@@ -160,8 +157,10 @@ class AtlasPlot:
         for i in range(len(x)):
             for j in range(len(y)):
                 if i+j < len(self.tickers): #we need n1+n2 < len(tickers)
-                    atlas_option_ij = AtlasOption(i,j,1,output_plot)
+                    atlas_option_ij = AtlasOption(0.0184,i,j,1,output_plot)
                     z[i][j] = atlas_option_ij.get_price()
+                else:
+                    z[i][j] = None
         
         #plot commands
         fig = plt.figure()
@@ -183,7 +182,7 @@ class AtlasPlot:
         x = np.linspace(0.5,1.5,20) #using a bunch of different arbitrary values for strike
         y = np.zeros(len(x))
         for i in range(len(x)):
-            atlas_option_i = AtlasOption(5,5,x[i],output_plot) #arbitrarily picked n1=n2=5
+            atlas_option_i = AtlasOption(0.0184,5,5,x[i],output_plot) #arbitrarily picked n1=n2=5
             y[i] = atlas_option_i.get_price()
             
         #plot commands
@@ -205,7 +204,7 @@ class AtlasPlot:
         for i in range(len(x)):
             sim_plot = BS_sim(self.history.get_latest_prices(), 0.0184, self.history.get_vols(), self.history.get_corr_mat(), maturities[i])
             output_plot = sim_plot.simulate(5000)
-            atlas_option_i = AtlasOption(5,5,1,output_plot) #arbitrarily picked n1=n2=5
+            atlas_option_i = AtlasOption(0.0184,5,5,1,output_plot) #arbitrarily picked n1=n2=5
             y[i] = atlas_option_i.get_price()
         
         #plot commands

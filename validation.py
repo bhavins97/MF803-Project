@@ -4,7 +4,6 @@ from class_defs import *
 Testing Stock History finder
 """
 tickers = ['AAPL','MSFT', 'F', 'AMZN','VOO']
-#tickers = ['AAPL','TSLA','BND','VOO']
 test = stock_history_finder(tickers)
 vols = test.get_vols()
 print("Volatilities")
