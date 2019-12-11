@@ -226,7 +226,7 @@ class AtlasPlot:
         
         #first, we need a simulation of the tickers
         sim_plot = BS_sim(self.history.get_latest_prices(), 0.0184, self.history.get_vols(), self.history.get_corr_mat(), 1)
-        output_plot = sim_plot.simulate(5000)
+        output_plot = sim_plot.simulate(10000)
         #n1 and n2 are the x and y axes
         x = range(len(self.tickers))
         y = range(len(self.tickers)) 
@@ -235,7 +235,7 @@ class AtlasPlot:
         #z is a two dimensional array of prices
         for i in range(len(x)):
             for j in range(len(y)):
-                if i+j < len(self.tickers): #we need n1+n2 < len(tickers)
+                if i+j < (len(self.tickers)-1): #we need n1+n2 < len(tickers)
                     atlas_option_ij = AtlasOption(0.0184,i,j,1,output_plot)
                     z[i][j] = atlas_option_ij.get_price()
                 else:
@@ -252,7 +252,7 @@ class AtlasPlot:
         ax.plot_surface(X,Y,z) #we can experiment with colors, shading, etc.
         plt.show()
         
-    def plot_strike_price(self): #2d plot of strike and price
+    def plot_strike_price(self,n1,n2): #2d plot of strike and price
         
         #first, we need a simulation of the tickers
         sim_plot = BS_sim(self.history.get_latest_prices(), 0.0184, self.history.get_vols(), self.history.get_corr_mat(), 1)
@@ -261,7 +261,7 @@ class AtlasPlot:
         x = np.linspace(0.5,1.5,20) #using a bunch of different arbitrary values for strike
         y = np.zeros(len(x))
         for i in range(len(x)):
-            atlas_option_i = AtlasOption(0.0184,5,5,x[i],output_plot) #arbitrarily picked n1=n2=5
+            atlas_option_i = AtlasOption(0.0184,n1,n2,x[i],output_plot) #arbitrarily picked n1=n2=5
             y[i] = atlas_option_i.get_price()
             
         #plot commands
@@ -271,7 +271,7 @@ class AtlasPlot:
         plt.plot(x,y)
         plt.show()
         
-    def plot_maturity_price(self): #2d plot of maturity and price
+    def plot_maturity_price(self,n1,n2): #2d plot of maturity and price
         
         #in order to plot price against maturity, we need a bunch of different simulations
         #arbitrarily picking 0.5,1,2,5,10,30 year maturities
@@ -283,7 +283,7 @@ class AtlasPlot:
         for i in range(len(x)):
             sim_plot = BS_sim(self.history.get_latest_prices(), 0.0184, self.history.get_vols(), self.history.get_corr_mat(), maturities[i])
             output_plot = sim_plot.simulate(5000)
-            atlas_option_i = AtlasOption(0.0184,5,5,1,output_plot) #arbitrarily picked n1=n2=5
+            atlas_option_i = AtlasOption(0.0184,n1,n2,1,output_plot) #arbitrarily picked n1=n2=5
             y[i] = atlas_option_i.get_price()
         
         #plot commands
