@@ -96,6 +96,7 @@ class BS_sim:
         
         return prices
 
+
 class AtlasOption:
 
     def __init__(self, rf_rate, n1, n2, strike, paths):
@@ -138,7 +139,83 @@ class AtlasOption:
         avg_disc_payoff = np.average(discounted_payoffs)
         
         return avg_disc_payoff
+
+class AtlasGreeks:
+
+    def __init__(self,tickers,rf_rate,n1,n2,strike,maturity):
+        self.tickers = tickers
+        self.rf_rate = rf_rate
+        self.n1 = n1
+        self.n2 = n2
+        self.strike = strike
+        self.maturity = maturity
+        self.stock_history = stock_history_finder(tickers)
+        self.vols = self.stock_history.get_vols()
+        self.corr = self.stock_history.get_corr_mat()
+        self.initial_prices = self.stock_history.get_latest_prices()
     
+    def get_index_delta(self):
+        sim_object_1 = BS_sim(self.initial_prices,self.rf_rate,self.vols,self.corr,self.maturity)
+        sim_1 = sim_object_1.simulate(sim_number = 20000)
+        atlas_object_1 = AtlasOption(self.rf_rate, self.n1,self.n2,self.strike,sim_1)
+        price_1 = atlas_object_1.get_price()
+        
+        deltas = []
+
+        for h in np.arange(0.5,10,0.5):
+            new_initial_prices = np.append(self.initial_prices[:-1], self.initial_prices[-1] + h)
+            sim_object_2 = BS_sim(new_initial_prices,self.rf_rate,self.vols,self.corr,self.maturity)
+            sim_2 = sim_object_2.simulate(sim_number = 20000)
+            atlas_object_2 = AtlasOption(self.rf_rate, self.n1,self.n2,self.strike,sim_2)
+            price_2 = atlas_object_2.get_price()
+            
+            delta = (price_2 - price_1)/h
+            deltas.append(delta)
+        return np.average(deltas)
+    
+    def get_index_vega(self):
+        
+        sim_object_1 = BS_sim(self.initial_prices,self.rf_rate,self.vols,self.corr,self.maturity)
+        sim_1 = sim_object_1.simulate(sim_number = 20000)
+        atlas_object_1 = AtlasOption(self.rf_rate, self.n1,self.n2,self.strike,sim_1)
+        price_1 = atlas_object_1.get_price()
+
+        vegas = []
+
+        for h in np.arange(0.002,0.04,0.002):
+            new_vols = np.append(self.vols[:-1], self.vols[-1] + h)
+            sim_object_2 = BS_sim(self.initial_prices,self.rf_rate,new_vols,self.corr,self.maturity)
+            sim_2 = sim_object_2.simulate(sim_number = 20000)
+            atlas_object_2 = AtlasOption(self.rf_rate, self.n1,self.n2,self.strike,sim_2)
+            price_2 = atlas_object_2.get_price()
+            
+            vega = (price_2 - price_1)/h
+            vegas.append(vega)
+        
+        return np.average(vega)/100
+
+    def get_index_theta(self):
+        
+        sim_object_1 = BS_sim(self.initial_prices,self.rf_rate,self.vols,self.corr,self.maturity)
+        sim_1 = sim_object_1.simulate(sim_number = 20000)
+        atlas_object_1 = AtlasOption(self.rf_rate, self.n1,self.n2,self.strike,sim_1)
+        price_1 = atlas_object_1.get_price()
+
+        thetas = []
+
+        for h in np.arange(12/252,180/252,21/252):
+            new_mat = self.maturity + h
+            sim_object_2 = BS_sim(self.initial_prices,self.rf_rate,self.vols,self.corr,new_mat)
+            sim_2 = sim_object_2.simulate(sim_number = 20000)
+            atlas_object_2 = AtlasOption(self.rf_rate, self.n1,self.n2,self.strike,sim_2)
+            price_2 = atlas_object_2.get_price()
+            
+            theta = (price_2 - price_1)/h
+            thetas.append(theta)
+        
+        return -np.average(thetas)/252
+
+
 class AtlasPlot:
     
     def __init__(self, ticker_list):

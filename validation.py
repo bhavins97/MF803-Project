@@ -64,29 +64,16 @@ call_and_put_px(tickers, test_paths_0_ret_vol, latest_prices)
 """
 Testing atlas prices now that we know the simulation class is working
 """
-<<<<<<< HEAD
 print("Should see decreasing numbers:")         #removing a stock from the top at a time
-print(AtlasOption(0,0,1,test_paths).get_price()) 
-print(AtlasOption(1,0,1,test_paths).get_price())
-print(AtlasOption(2,0,1,test_paths).get_price())
-print(AtlasOption(3,0,1,test_paths).get_price())
-print("Should see increasing numbers:")         #removing a stock from the bottom at a time
-print(AtlasOption(0,0,1,test_paths).get_price())
-print(AtlasOption(0,1,1,test_paths).get_price())
-print(AtlasOption(0,2,1,test_paths).get_price())
-print(AtlasOption(0,3,1,test_paths).get_price())
-=======
-print("Should see decreasing numbers:")
-print(AtlasOption(0.0184,0,0,1,test_paths).get_price())
+print(AtlasOption(0.0184,0,0,1,test_paths).get_price()) 
 print(AtlasOption(0.0184,1,0,1,test_paths).get_price())
 print(AtlasOption(0.0184,2,0,1,test_paths).get_price())
 print(AtlasOption(0.0184,3,0,1,test_paths).get_price())
-print("Should see increasing numbers:")
+print("Should see increasing numbers:")         #removing a stock from the bottom at a time
 print(AtlasOption(0.0184,0,0,1,test_paths).get_price())
 print(AtlasOption(0.0184,0,1,1,test_paths).get_price())
 print(AtlasOption(0.0184,0,2,1,test_paths).get_price())
-print(AtlasOption(0.0184, 0,3,1,test_paths).get_price())
->>>>>>> 8d1ab3f25060810012414ef759d711bcabdf4a6e
+print(AtlasOption(0.0184,0,3,1,test_paths).get_price())
 print("Should see 0")
 print(AtlasOption(0.0184,0,0,1,test_paths_0_mat).get_price())
 print("Should see:", float(latest_prices[-1]) * (np.exp(0.0184)-1))
