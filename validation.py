@@ -64,12 +64,12 @@ call_and_put_px(tickers, test_paths_0_ret_vol, latest_prices)
 """
 Testing atlas prices now that we know the simulation class is working
 """
-print("Should see decreasing numbers:")
-print(AtlasOption(0,0,1,test_paths).get_price())
+print("Should see decreasing numbers:")         #removing a stock from the top at a time
+print(AtlasOption(0,0,1,test_paths).get_price()) 
 print(AtlasOption(1,0,1,test_paths).get_price())
 print(AtlasOption(2,0,1,test_paths).get_price())
 print(AtlasOption(3,0,1,test_paths).get_price())
-print("Should see increasing numbers:")
+print("Should see increasing numbers:")         #removing a stock from the bottom at a time
 print(AtlasOption(0,0,1,test_paths).get_price())
 print(AtlasOption(0,1,1,test_paths).get_price())
 print(AtlasOption(0,2,1,test_paths).get_price())
