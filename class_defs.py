@@ -294,6 +294,15 @@ class AtlasPlot:
         plt.show()
 
 
+test_sim = BS_sim([100,150,100], 0.0184, [0.25,0.25,0.1], [[1,0,0],[0,1,0],[0,0,1]], 1).simulate(sim_number = 40000)
+test_sim_1 = BS_sim([100,150,100], 0.0184, [0.25,0.25,0.1], [[1,0.5,0],[0.5,1,0],[0,0,1]], 1).simulate(sim_number = 40000)
+test_sim_2 = BS_sim([100,150,100], 0.0184, [0.25,0.25,0.1], [[1,-0.5,0],[-0.5,1,0],[0,0,1]], 1).simulate(sim_number = 40000)
+test_price = AtlasOption(0.0184,0,0,1,test_sim).get_price()
+test_price_1 = AtlasOption(0.0184,0,0,1,test_sim_1).get_price()
+test_price_2 = AtlasOption(0.0184,0,0,1,test_sim_2).get_price()
+print(test_price)
+print(test_price_1)
+print(test_price_2)
 
 #plots
 
